@@ -3,12 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <title>Address Validator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        #response {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8f8f8; 
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .logo {
+            width: 75px;
+        }
+    </style>
     <script>
         async function validateAddress() {
             const address = document.getElementById('addressInput').value;
             const responseDiv = document.getElementById('response');
 
-            responseDiv.innerHTML = '';
+            responseDiv.innerHTML = ''; 
+            responseDiv.style.display = 'none'; 
 
             try {
                 const response = await fetch('http://127.0.0.1:8000/validate', {
@@ -22,21 +77,30 @@
                 const data = await response.json();
                 
                 if (response.ok) {
-                    responseDiv.innerHTML = `Result: ${data.message}`;
+                    responseDiv.innerHTML = `${data.message}`;
+                    responseDiv.style.backgroundColor = data.validation ? '#d4edda' : '#f8d7da';
                 } else {
                     responseDiv.innerHTML = `Error: ${data.message}`;
+                    responseDiv.style.backgroundColor = '#f8d7da';
                 }
+
+                responseDiv.style.display = 'block'; 
             } catch (error) {
                 console.error('Error:', error);
                 responseDiv.innerHTML = 'Error: Could not reach the server.';
+                responseDiv.style.backgroundColor = '#f8d7da'; 
+                responseDiv.style.display = 'block'; 
             }
         }
     </script>
 </head>
 <body>
-    <h1>Address Validator</h1>
-    <input type="text" id="addressInput" placeholder="Enter an address" />
-    <button onclick="validateAddress()">Validate Address</button>
-    <div id="response"></div>
+    <div class="container">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/27/Swiss_Post_logo_2023.svg" alt="Swiss Post Logo" class="logo">
+        <h1>Address Validator</h1>
+        <input type="text" id="addressInput" placeholder="Enter an address" />
+        <button onclick="validateAddress()">Validate Address</button>
+        <div id="response"></div>
+    </div>
 </body>
 </html>

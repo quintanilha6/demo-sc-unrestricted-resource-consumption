@@ -19,7 +19,6 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 class AddressValidationResource:
     def on_post(self, req, resp):
-        logging.info("Received request for address validation")
         try:
             address_data = json.loads(req.stream.read().decode('utf-8'))
         except ValueError:
