@@ -15,13 +15,14 @@
             height: 100vh;
         }
 
-        .container {
+        .container, .security-settings {
             background: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             text-align: center;
             width: 300px;
+            margin: 10px;
         }
 
         input, button {
@@ -29,6 +30,14 @@
             padding: 10px;
             margin-top: 10px;
             border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .switch {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
             border-radius: 4px;
             box-sizing: border-box;
         }
@@ -56,6 +65,58 @@
         .logo {
             width: 75px;
         }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            vertical-align: middle; /* Aligns switch with text vertically */
+            margin-right: 10px; /* Adds spacing between the switch and the label */
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .label-container {
+            display: flex;
+            align-items: center; /* Ensures vertical alignment is centered */
+            margin-top: 10px;
+        }
+        
     </style>
     <script>
         async function validateAddress() {
@@ -101,6 +162,44 @@
         <input type="text" id="addressInput" placeholder="Enter an address" />
         <button onclick="validateAddress()">Validate Address</button>
         <div id="response"></div>
+    </div>
+    <div class="security-settings">
+        <h2>Security Features</h2>
+        <div class="label-container">
+            <label class="switch">
+                <input type="checkbox" id="resourceQuotas">
+                <span class="slider"></span>
+            </label>
+            Resource Quotas
+        </div>
+        <div class="label-container">
+            <label class="switch">
+                <input type="checkbox" id="timeouts">
+                <span class="slider"></span>
+            </label>
+            Timeouts
+        </div>
+        <div class="label-container">
+            <label class="switch">
+                <input type="checkbox" id="concurrency">
+                <span class="slider"></span>
+            </label>
+            Concurrency Limits
+        </div>
+        <div class="label-container">
+            <label class="switch">
+                <input type="checkbox" id="inputValidation">
+                <span class="slider"></span>
+            </label>
+            Input Validation
+        </div>
+        <div class="label-container">
+            <label class="switch">
+                <input type="checkbox" id="efficiency">
+                <span class="slider"></span>
+            </label>
+            Efficiency Enhancements
+        </div>
     </div>
 </body>
 </html>
