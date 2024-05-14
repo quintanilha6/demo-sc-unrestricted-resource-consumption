@@ -10,7 +10,7 @@ class ExternalAddressProvider:
     def __init__(self):
         self.addresses = [
             "Main Street", "Main Avenue", "Maple Street", "Elm Street", "Oak Avenue", "Pine Street",
-            "Urb. dos Camarinhos", "Rua da fonte", "Impasse de Fougeres", "Travessa da Encosta"
+            "Urb. dos Camarinhos", "Rua da fonte", "Impasse de Fougeres", "Travessa da Encosta",
             "Impasse des Fougeres", "Impasse des Alpes", "Cherry Lane", "Cherry Court",
             "Orchard Road", "Grove Lane", "Forest Drive", "Hill Valley", "Summer Road",
             "River Road", "Lake Avenue", "Winter Lane", "Spring Street", "Autumn Road",
