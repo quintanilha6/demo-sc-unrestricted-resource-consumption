@@ -122,10 +122,9 @@
         async function validateAddress() {
             const address = document.getElementById('addressInput').value;
             const responseDiv = document.getElementById('response');
-
             responseDiv.innerHTML = ''; 
             responseDiv.style.display = 'none'; 
-
+    
             try {
                 const response = await fetch('http://127.0.0.1:8000/validate', {
                     method: 'POST',
@@ -134,9 +133,9 @@
                     },
                     body: JSON.stringify({ address: address })
                 });
-                
+    
                 const data = await response.json();
-                
+    
                 if (response.ok) {
                     responseDiv.innerHTML = `${data.message}`;
                     responseDiv.style.backgroundColor = data.validation ? '#d4edda' : '#f8d7da';
@@ -144,7 +143,7 @@
                     responseDiv.innerHTML = `Error: ${data.message}`;
                     responseDiv.style.backgroundColor = '#f8d7da';
                 }
-
+    
                 responseDiv.style.display = 'block'; 
             } catch (error) {
                 console.error('Error:', error);
@@ -153,7 +152,58 @@
                 responseDiv.style.display = 'block'; 
             }
         }
-    </script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const switches = document.querySelectorAll('.switch input');
+            switches.forEach(sw => {
+                sw.addEventListener('change', function () {
+                    updateFeatureFlag(this.id, this.checked);
+                });
+            });
+            fetchFeatureFlags();
+        });
+
+        async function fetchFeatureFlags() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/toggle-feature', {
+                    method: 'GET'
+                });
+                const data = await response.json();
+                if (data.status === 'success') {
+                    Object.keys(data.flags).forEach(feature => {
+                        const featureSwitch = document.getElementById(feature);
+                        if (featureSwitch) {
+                            featureSwitch.checked = data.flags[feature];
+                        }
+                    });
+                } else {
+                    console.error('Failed to fetch feature flags:', data.message);
+                }
+            } catch (error) {
+                console.error('Error fetching feature flags:', error);
+            }
+        }
+    
+        async function updateFeatureFlag(feature, enabled) {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/toggle-feature', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ feature: feature, enabled: enabled })
+                });
+    
+                if (!response.ok) {
+                    throw new Error('Failed to update feature flag');
+                }
+                const result = await response.json();
+                console.log(result.message); // You can also update the UI to reflect this change if needed
+            } catch (error) {
+                console.error('Error updating feature flag:', error);
+            }
+        }
+    </script>    
 </head>
 <body>
     <div class="container">
@@ -164,7 +214,7 @@
         <div id="response"></div>
     </div>
     <div class="security-settings">
-        <h2>Security Features</h2>
+        <h2>Security Feature Flags</h2>
         <div class="label-container">
             <label class="switch">
                 <input type="checkbox" id="resourceQuotas">

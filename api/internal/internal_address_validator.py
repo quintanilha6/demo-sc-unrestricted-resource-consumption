@@ -3,8 +3,10 @@ import json
 import requests
 import logging
 import time
+from security_feature_flags import feature_flags
 
-# CORS Middleware to allow cross-origin requests
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 class CorsMiddleware:
     def process_request(self, req, resp):
         resp.set_header('Access-Control-Allow-Origin', '*')
@@ -15,7 +17,31 @@ class CorsMiddleware:
         if req.method == 'OPTIONS':
             resp.status = falcon.HTTP_200
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+class ToggleFeatureResource:
+    def on_post(self, req, resp):
+        try:
+            data = json.loads(req.stream.read().decode('utf-8'))
+            feature = data['feature']
+            enabled = data['enabled']
+            if feature_flags.set_flag(feature, enabled):
+                logging.info(f"Feature '{feature}' updated to {feature_flags.is_enabled(feature)}\n")
+                resp.media = {"status": "success", "message": f"Feature '{feature}' updated."}
+                resp.status = falcon.HTTP_200
+            else:
+                resp.media = {"status": "error", "message": "Feature not found."}
+                resp.status = falcon.HTTP_404
+        except Exception as e:
+            logging.error("Failed to update feature flag", exc_info=e)
+            resp.media = {"status": "error", "message": "Failed to update feature flag"}
+            resp.status = falcon.HTTP_500
+    def on_get(self, req, resp):
+        try:
+            resp.media = {"status": "success", "flags": feature_flags.flags}
+            resp.status = falcon.HTTP_200
+        except Exception as e:
+            logging.error("Failed to retrieve feature flags", exc_info=e)
+            resp.media = {"status": "error", "message": "Failed to retrieve feature flags"}
+            resp.status = falcon.HTTP_500
 
 class AddressValidationResource:
     def on_post(self, req, resp):
@@ -69,3 +95,4 @@ class AddressValidationResource:
 
 app = falcon.App(middleware=[CorsMiddleware()])
 app.add_route('/validate', AddressValidationResource())
+app.add_route('/toggle-feature', ToggleFeatureResource())
