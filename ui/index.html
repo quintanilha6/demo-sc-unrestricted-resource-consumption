@@ -140,7 +140,7 @@
                     responseDiv.innerHTML = `${data.message}`;
                     responseDiv.style.backgroundColor = data.validation ? '#d4edda' : '#f8d7da';
                 } else {
-                    responseDiv.innerHTML = `Error: ${data.message}`;
+                    responseDiv.innerHTML = `${data.message}`;
                     responseDiv.style.backgroundColor = '#f8d7da';
                 }
     
@@ -220,7 +220,7 @@
                 <input type="checkbox" id="resourceQuotas">
                 <span class="slider"></span>
             </label>
-            Resource Quotas
+            Resource Quotas (5 req/10 sec)
         </div>
         <div class="label-container">
             <label class="switch">

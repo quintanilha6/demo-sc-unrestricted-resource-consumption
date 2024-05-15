@@ -24,7 +24,7 @@ class ToggleFeatureResource:
             feature = data['feature']
             enabled = data['enabled']
             if feature_flags.set_flag(feature, enabled):
-                logging.info(f"Feature '{feature}' updated to {feature_flags.is_enabled(feature)}\n")
+                logging.info(f"Feature '{feature}' updated to {feature_flags.is_enabled(feature)}")
                 resp.media = {"status": "success", "message": f"Feature '{feature}' updated."}
                 resp.status = falcon.HTTP_200
             else:
@@ -45,6 +45,15 @@ class ToggleFeatureResource:
 
 class AddressValidationResource:
     def on_post(self, req, resp):
+        if not feature_flags.check_and_increment_quota():
+            logging.error("Quota exceeded. Please wait 5 seconds before retrying.")
+            resp.media = {
+                'status': 'error',
+                'message': 'Quota exceeded. Please wait 5 seconds before retrying.'
+            }
+            resp.status = falcon.HTTP_429  # HTTP 429 Too Many Requests
+            return
+
         try:
             address_data = json.loads(req.stream.read().decode('utf-8'))
         except ValueError:
@@ -56,16 +65,13 @@ class AddressValidationResource:
             raise falcon.HTTPBadRequest('Invalid request', 'Address field is required.')
 
         address = address_data['address']
-
         logging.info(f"Received address: {address}")
         logging.info(f"Sending address to external service for validation: {address}")
         
-        time.sleep(0.25)  # Simulate some latency
         validated_data = self.validate_address_external(address)
-        time.sleep(0.25)  # Simulate some latency
 
         if validated_data:
-            logging.info(f"External service response: {validated_data.get('message')}\n")
+            logging.info(f"External service response: {validated_data.get('message')}")
             resp.media = {
                 'status': 'success',
                 'validation': validated_data.get('validation'),
