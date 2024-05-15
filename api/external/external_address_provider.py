@@ -1,6 +1,7 @@
 import falcon
 import json
 import logging
+import time
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -33,6 +34,12 @@ class ExternalAddressProvider:
         ]
 
     def on_post(self, req, resp):
+        # Retrieve the 'wait' query parameter from the request
+        wait_time = req.get_param_as_int('wait')  # Automatically converts to integer, returns None if not found or not an integer
+
+        if wait_time is not None and wait_time > 0:
+            time.sleep(wait_time)  # Sleep for 'wait_time' seconds
+
         try:
             data = json.loads(req.stream.read().decode('utf-8'))
             query_string = data.get('address')
@@ -48,8 +55,7 @@ class ExternalAddressProvider:
             resp.media = {'error': 'Address field is required'}
             return
 
-        logging.info(f"Received address for validation: {query_string}")
-        # Check if the address is in the database
+        if wait_time == None: logging.info(f"Received address for validation: {query_string}")
         if query_string in self.addresses:
             validation = True
             message = "Address is valid."
@@ -57,10 +63,10 @@ class ExternalAddressProvider:
             validation = False
             message = "Address is not valid."
 
-        logging.info(f"Validation result for {query_string}: {message}")
+        if wait_time == None: logging.info(f"Validation result for {query_string}: {message}")
 
         self.price_to_charge += 0.01
-        logging.info(f"Charging client 0.01 CHF. Total to be charged at the end of the month: {self.price_to_charge:.2f} CHF\n")
+        if wait_time == None: logging.info(f"Charging client 0.01 CHF. Total to be charged at the end of the month: {self.price_to_charge:.2f} CHF\n")
 
         resp.media = {
             'validation': validation,
