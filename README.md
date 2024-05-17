@@ -1,5 +1,10 @@
 # Demonstration Project for Managing Unrestricted Resource Consumption
 
+### Table of Contents
+**[Introduction](#introduction)**<br>
+**[Strategies Explained](#strategies-explained)**<br>
+**[How to run the app](#how-to-run-the-app)**<br>
+
 ## Introduction
 This repository focuses on addressing on demonstrating some risks associated with unrestricted resource consumption within a web-based address validation service. The topic was chosen as part of a voluntary initiative to deepen understanding of system vulnerabilities and to demonstrate practical defense mechanisms against potential exploitation. The project serves as a hands-on educational tool to explore various security features and optimizations that enhance application robustness and resilience.
 
@@ -73,6 +78,6 @@ Some of the stategies to protect against Unrestricted Resource Consumption are:
         return result
     ```
 
-## How to run the app?
+## How to run the app
 - Run the 3 apps (internal api, external api and UI) with docker-compose `docker-compose up -d --build`
 - Check the logs for each of the apis with `docker-compose logs -f external_api` and `docker-compose logs -f internal_api`
