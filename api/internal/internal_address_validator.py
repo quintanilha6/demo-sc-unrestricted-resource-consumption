@@ -107,9 +107,9 @@ class AddressValidationResource:
 
     def validate_address_external(self, address, wait=None):
         if wait is not None:
-            url = f'http://127.0.0.1:8001/validate?wait={wait}'
+            url = f'http://external_api:8001/validate?wait={wait}'
         else:
-            url = 'http://127.0.0.1:8001/validate'
+            url = 'http://external_api:8001/validate'
         
         try:
             response = requests.post(url, json={'address': address}, timeout=3)
