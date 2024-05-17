@@ -54,12 +54,13 @@
         }
 
         #response {
+            visibility: hidden;  
+            min-height: 18px;
             margin-top: 15px;
             padding: 10px;
             background-color: #f8f8f8; 
             border: 1px solid #ddd;
             border-radius: 4px;
-            display: none;
         }
 
         .logo {
@@ -123,8 +124,7 @@
             const address = document.getElementById('addressInput').value;
             const responseDiv = document.getElementById('response');
             responseDiv.innerHTML = ''; 
-            responseDiv.style.display = 'none'; 
-    
+            responseDiv.style.visibility = 'hidden';  
             try {
                 const response = await fetch('http://127.0.0.1:8000/validate', {
                     method: 'POST',
@@ -144,7 +144,7 @@
                     responseDiv.style.backgroundColor = '#f8d7da';
                 }
     
-                responseDiv.style.display = 'block'; 
+                responseDiv.style.visibility = 'visible'; 
             } catch (error) {
                 console.error('Error:', error);
                 responseDiv.innerHTML = 'Error: Could not reach the server.';
@@ -210,7 +210,10 @@
         <img src="https://upload.wikimedia.org/wikipedia/commons/2/27/Swiss_Post_logo_2023.svg" alt="Swiss Post Logo" class="logo">
         <h1>Address Validator</h1>
         <input type="text" id="addressInput" placeholder="Enter an address" />
-        <button onclick="validateAddress()">Validate Address</button>
+        <button onclick="validateAddress()">
+            Validate Address with
+            <img src="./resources/fedex.png" alt="FedEx" style="height: 29px; vertical-align: middle; margin-bottom: 2px;">
+        </button>
         <div id="response"></div>
     </div>
     <div class="security-settings">
