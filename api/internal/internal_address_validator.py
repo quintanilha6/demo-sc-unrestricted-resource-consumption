@@ -2,7 +2,7 @@ import falcon
 import json
 import requests
 import logging
-import time
+import re
 from security_feature_flags import feature_flags
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -22,6 +22,10 @@ class TimeoutException(Exception):
         self.message = message
         super().__init__(self.message)
 
+class InputValidationException(Exception):
+    def __init__(self, message="Input is not valid"):
+        self.message = message
+        super().__init__(self.message)
 
 class ToggleFeatureResource:
     def on_post(self, req, resp):
@@ -67,8 +71,13 @@ class AddressValidationResource:
 
         try:
             address_data = json.loads(req.stream.read().decode('utf-8'))
-            if not address_data.get('address'):
-                raise falcon.HTTPBadRequest('Invalid request', 'Address field is required.')
+            
+            # Address Validation
+            if feature_flags.is_enabled('inputValidation'):
+                if not address_data.get('address'):
+                    raise InputValidationException("Address input is required")
+                if not self.validate_address_input(address_data['address']):
+                    raise InputValidationException("Address input is not valid.")
 
             address = address_data['address']
             logging.info(f"Received address: {address}")
@@ -92,19 +101,32 @@ class AddressValidationResource:
                     'message': 'Failed to validate address with external service'
                 }
                 resp.status = falcon.HTTP_500
-                
+
+        except InputValidationException as e:
+            logging.error(f"{str(e)}")
+            resp.media = {
+                'status': 'error',
+                'message': str(e)
+            }
+            resp.status = falcon.HTTP_400
+
         except TimeoutException as e:
             logging.error(f"Timeout occurred: {str(e)}")
             resp.media = {
                 'status': 'error',
                 'message': str(e)
             }
-            resp.status = falcon.HTTP_400  # HTTP 408 Request Timeout
+            resp.status = falcon.HTTP_400
 
         except ValueError:
             logging.error("Malformed JSON received")
             raise falcon.HTTPError(falcon.HTTP_400, 'Malformed JSON')
 
+    def validate_address_input(self, address):
+        address = address.strip()
+        pattern = re.compile(r'^[a-zA-Z0-9 ,.-]+$')
+        return pattern.match(address) is not None
+    
     def validate_address_external(self, address, wait=None):
         if wait is not None:
             url = f'http://external_api:8001/validate?wait={wait}'

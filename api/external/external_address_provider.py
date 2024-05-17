@@ -50,10 +50,7 @@ class ExternalAddressProvider:
             return
 
         if not query_string:
-            logging.error("Received empty query for address validation")
-            resp.status = falcon.HTTP_400
-            resp.media = {'error': 'Address field is required'}
-            return
+            query_string = ""
 
         if wait_time == None: logging.info(f"Received address for validation: {query_string}")
         if query_string in self.addresses:
