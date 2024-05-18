@@ -4,6 +4,7 @@
 **[Introduction](#introduction)**<br>
 **[Strategies Explained](#strategies-explained)**<br>
 **[How to run the app](#how-to-run-the-app)**<br>
+**[Demo Architecture Diagram](#demo-architecture-diagram)**<br>
 
 ## Introduction
 This repository focuses on addressing on demonstrating some risks associated with unrestricted resource consumption within a web-based address validation service. The topic was chosen as part of a voluntary initiative to deepen understanding of system vulnerabilities and to demonstrate practical defense mechanisms against potential exploitation. The project serves as a hands-on educational tool to explore various security features and optimizations that enhance application robustness and resilience.
@@ -78,6 +79,38 @@ Some of the stategies to protect against Unrestricted Resource Consumption are:
         return result
     ```
 
+## Demo Architecture Diagram
+```
++--------------------------------+
+|           User Interface       |
+|--------------------------------|
+| - HTML, CSS, JavaScript        |
+| - Address Validation Form      |
+| - Feature Flag Toggles         |
++---------------|----------------+
+                |
+                v
++--------------------------------+                  +-------------------------+
+|         Internal API           |                  |      External API       |
+|--------------------------------|  POST /validate  |-------------------------|
+| - Falcon, Python               |----------------->| - Falcon, Python        |
+| - Middleware (CORS, Logging)   |                  | - Address Validation    |
+| - ToggleFeatureResource        |  Response        | - Simulate Charging     |
+| - AddressValidationResource    |<-----------------| - Logging               |
+| - security_feature_flags.py    |                  +-------------------------+
++--------------------------------+
+                |
+                v
+       +----------------+
+       | Docker Compose |
+       |----------------|
+       | internal_api   |
+       | external_api   |
+       | ui             |
+       +----------------+
+```
+
 ## How to run the app
 - Run the 3 apps (internal api, external api and UI) with docker-compose `docker-compose up -d --build`
+- Go to `localhost:8080` for the ui
 - Check the logs for each of the apis with `docker-compose logs -f external_api` and `docker-compose logs -f internal_api`
