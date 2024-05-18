@@ -67,7 +67,7 @@ Some of the stategies to protect against Unrestricted Resource Consumption are:
 
 ### 5. Efficiency Enhancements
 - **Definition:**  Improvements in code and system architecture that allow processes to use fewer resources, thereby increasing throughput and reducing latency.
-- **Example:** Caching Successful Validations: Implement caching to store the results of previously validated addresses. This reduces the need to perform redundant external API calls for addresses that have been validated before, saving time and resources.
+- **Example:** Caching Validations: Implement caching to store the results of previously submited addresses. This reduces the need to perform redundant external API calls for addresses that have been checked before, saving time and resources.
     ```python
     cache = {}
 

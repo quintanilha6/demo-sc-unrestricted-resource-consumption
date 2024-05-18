@@ -6,6 +6,7 @@ import re
 from security_feature_flags import feature_flags
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+cache = {}
 
 class CorsMiddleware:
     def process_request(self, req, resp):
@@ -81,6 +82,19 @@ class AddressValidationResource:
 
             address = address_data['address']
             logging.info(f"Received address: {address}")
+
+            # Check cache first
+            if feature_flags.is_enabled('efficiency'):
+                cached_result = self.get_cached_address(address)
+                if cached_result:
+                    logging.info(f"Cache hit for address: {address}")
+                    resp.media = {
+                        'status': 'success',
+                        'validation': cached_result.get('validation'),
+                        'message': cached_result.get('message')
+                    }
+                    resp.status = falcon.HTTP_200
+                    return
             
             # Check if timeouts are enabled and if the request count is a multiple of 5
             wait_time = 5 if feature_flags.is_enabled('timeouts') and self.request_count % 5 == 0 else None
@@ -88,6 +102,14 @@ class AddressValidationResource:
 
             if validated_data:
                 logging.info(f"External service response: {validated_data.get('message')}")
+                if feature_flags.is_enabled('efficiency'):
+                    # Cache the successful validation
+                    self.cache_validated_address(address, validated_data)
+                    resp.media = {
+                        'status': 'success',
+                        'validation': validated_data.get('validation'),
+                        'message': validated_data.get('message')
+                    }
                 resp.media = {
                     'status': 'success',
                     'validation': validated_data.get('validation'),
@@ -147,6 +169,12 @@ class AddressValidationResource:
         except requests.exceptions.RequestException as e:
             logging.error(f"Error contacting external service: {e}")
             return None
+        
+    def get_cached_address(self, address):
+        return cache.get(address)
+
+    def cache_validated_address(self, address, data):
+        cache[address] = data
 
 app = falcon.App(middleware=[CorsMiddleware()])
 app.add_route('/validate', AddressValidationResource())
