@@ -97,10 +97,10 @@ Some of the stategies to protect against Unrestricted Resource Consumption are:
 | - Middleware (CORS, Logging)   |                  | - Address Validation    |
 | - ToggleFeatureResource        |  Response        | - Simulate Charging     |
 | - AddressValidationResource    |<-----------------| - Logging               |
-| - security_feature_flags.py    |                  +-------------------------+
+| - FeatureFlags                 |                  +-------------------------+
 +--------------------------------+
-                |
-                v
+                
+                
        +----------------+
        | Docker Compose |
        |----------------|
