@@ -7,7 +7,7 @@
 **[Demo Architecture Diagram](#demo-architecture-diagram)**<br>
 
 ## Introduction
-This repository focuses on addressing on demonstrating some risks associated with unrestricted resource consumption within a web-based address validation service. The topic was chosen as part of a voluntary initiative to deepen understanding of system vulnerabilities and to demonstrate practical defense mechanisms against potential exploitation. The project serves as a hands-on educational tool to explore various security features and optimizations that enhance application robustness and resilience.
+This repository focuses on demonstrating some risks associated with unrestricted resource consumption within a web-based address validation service. The topic was chosen as part of a voluntary initiative to deepen understanding of system vulnerabilities and to demonstrate practical defense mechanisms against potential exploitation. The project serves as a hands-on educational tool to explore various security features and optimizations that enhance application robustness and resilience.
 
 Some of the stategies to protect against Unrestricted Resource Consumption are:
 
