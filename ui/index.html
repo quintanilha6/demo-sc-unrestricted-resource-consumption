@@ -153,6 +153,47 @@
             }
         }
 
+        async function simulateConcurrentRequests() {
+            const responseDiv = document.getElementById('response');
+            responseDiv.innerHTML = ''; 
+            responseDiv.style.visibility = 'hidden';
+            const address = '123 Main St';
+            const promises = [];
+            
+            for (let i = 0; i < 6; i++) {
+                promises.push(
+                    fetch('http://127.0.0.1:8000/validate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ address: address })
+                    })
+                    .then(response => {
+                        const timestamp = new Date().toISOString();
+                        console.log(`Request ${i + 1} completed at ${timestamp}`);
+                        return response.json();
+                    })
+                    .catch(error => ({ status: 'error', message: 'Request failed' }))
+                );
+            }
+
+            try {
+                const results = await Promise.all(promises);
+                results.forEach((result, index) => {
+                    const p = document.createElement('p');
+                    p.innerText = `Request ${index + 1}: Status: ${result.status || 'success'}, Message: ${result.message}`;
+                    responseDiv.appendChild(p);
+                });
+                responseDiv.style.visibility = 'visible';
+            } catch (error) {
+                console.error('Error:', error);
+                responseDiv.innerHTML = 'Error: Could not reach the server.';
+                responseDiv.style.backgroundColor = '#f8d7da';
+                responseDiv.style.visibility = 'visible';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             const switches = document.querySelectorAll('.switch input');
             switches.forEach(sw => {
@@ -176,6 +217,7 @@
                             featureSwitch.checked = data.flags[feature];
                         }
                     });
+                    toggleConcurrencyButton(data.flags['concurrency']);
                 } else {
                     console.error('Failed to fetch feature flags:', data.message);
                 }
@@ -199,8 +241,20 @@
                 }
                 const result = await response.json();
                 console.log(result.message); // You can also update the UI to reflect this change if needed
+                if (feature === 'concurrency') {
+                    toggleConcurrencyButton(enabled);
+                }
             } catch (error) {
                 console.error('Error updating feature flag:', error);
+            }
+        }
+
+        function toggleConcurrencyButton(enabled) {
+            const button = document.getElementById('concurrencyButton');
+            if (enabled) {
+                button.style.display = 'block';
+            } else {
+                button.style.display = 'none';
             }
         }
     </script>    
@@ -213,6 +267,9 @@
         <button onclick="validateAddress()">
             Validate Address with
             <img src="./resources/fedex.png" alt="FedEx" style="height: 29px; vertical-align: middle; margin-bottom: 2px;">
+        </button>
+        <button id="concurrencyButton" style="display: none;" onclick="simulateConcurrentRequests()">
+            Simulate 6 Concurrent Requests
         </button>
         <div id="response"></div>
     </div>

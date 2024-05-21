@@ -3,7 +3,9 @@ import json
 import requests
 import logging
 import re
+import time
 from security_feature_flags import feature_flags
+from threading import Semaphore
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 cache = {}
@@ -20,13 +22,15 @@ class CorsMiddleware:
 
 class TimeoutException(Exception):
     def __init__(self, message="Request timed out"):
-        self.message = message
-        super().__init__(self.message)
+        super().__init__(message)
 
 class InputValidationException(Exception):
     def __init__(self, message="Input is not valid"):
-        self.message = message
-        super().__init__(self.message)
+        super().__init__(message)
+
+class ConcurrencyLimitException(Exception):
+    def __init__(self, message="Concurrency limit exceeded"):
+        super().__init__(message)
 
 class ToggleFeatureResource:
     def on_post(self, req, resp):
@@ -45,6 +49,7 @@ class ToggleFeatureResource:
             logging.error("Failed to update feature flag", exc_info=e)
             resp.media = {"status": "error", "message": "Failed to update feature flag"}
             resp.status = falcon.HTTP_500
+
     def on_get(self, req, resp):
         try:
             resp.media = {"status": "success", "flags": feature_flags.flags}
@@ -55,24 +60,32 @@ class ToggleFeatureResource:
             resp.status = falcon.HTTP_500
 
 class AddressValidationResource:
-    def __init__(self):
-        self.request_count = 0  # Initialize the request counter
+    def __init__(self, concurrency_limit=5):
+        self.semaphore = Semaphore(concurrency_limit)  # Initialize the semaphore with the concurrency limit
 
     def on_post(self, req, resp):
-        if feature_flags.is_enabled('timeouts'):
-            self.request_count += 1  # Increment only if timeouts are enabled
+        logging.info("Request received")
 
-        if not feature_flags.check_and_increment_quota():
-            resp.media = {
-                'status': 'error',
-                'message': 'Quota exceeded. Please wait 30 seconds before retrying.'
-            }
-            resp.status = falcon.HTTP_429
-            return
+        # Check if concurrency limits are enabled
+        if feature_flags.is_enabled('concurrency'):
+            logging.info("Concurrency feature is enabled")
+            # Attempt to acquire the semaphore
+            if not self.semaphore.acquire(blocking=False):
+                logging.error("Concurrency limit exceeded")
+                resp.media = {
+                    'status': 'error',
+                    'message': 'Concurrency limit exceeded'
+                }
+                resp.status = falcon.HTTP_429
+                return
+            logging.info("Semaphore acquired, current count: %d", self.semaphore._value)
 
         try:
             address_data = json.loads(req.stream.read().decode('utf-8'))
             
+            
+            # Address Validation
+
             # Address Validation
             if feature_flags.is_enabled('inputValidation'):
                 if not address_data.get('address'):
@@ -83,7 +96,9 @@ class AddressValidationResource:
             address = address_data['address']
             logging.info(f"Received address: {address}")
 
-            # Check cache first
+            # Simulate processing delay
+            time.sleep(2)
+
             if feature_flags.is_enabled('efficiency'):
                 cached_result = self.get_cached_address(address)
                 if cached_result:
@@ -95,15 +110,12 @@ class AddressValidationResource:
                     }
                     resp.status = falcon.HTTP_200
                     return
-            
-            # Check if timeouts are enabled and if the request count is a multiple of 5
-            wait_time = 5 if feature_flags.is_enabled('timeouts') and self.request_count % 5 == 0 else None
-            validated_data = self.validate_address_external(address, wait=wait_time)
+
+            validated_data = self.validate_address_external(address)
 
             if validated_data:
                 logging.info(f"External service response: {validated_data.get('message')}")
                 if feature_flags.is_enabled('efficiency'):
-                    # Cache the successful validation
                     self.cache_validated_address(address, validated_data)
                     resp.media = {
                         'status': 'success',
@@ -140,9 +152,11 @@ class AddressValidationResource:
             }
             resp.status = falcon.HTTP_400
 
-        except ValueError:
-            logging.error("Malformed JSON received")
-            raise falcon.HTTPError(falcon.HTTP_400, 'Malformed JSON')
+        finally:
+            # Always release the semaphore if concurrency is enabled
+            if feature_flags.is_enabled('concurrency'):
+                self.semaphore.release()
+                logging.info("Semaphore released, current count: %d", self.semaphore._value)
 
     def validate_address_input(self, address):
         address = address.strip()
@@ -162,14 +176,14 @@ class AddressValidationResource:
             else:
                 logging.error(f"External service returned HTTP {response.status_code}")
                 return None
-            
+
         except requests.exceptions.Timeout:
             logging.error("The request timed out after 3 seconds")
             raise TimeoutException("The request timed out after 3 seconds")
         except requests.exceptions.RequestException as e:
             logging.error(f"Error contacting external service: {e}")
             return None
-        
+
     def get_cached_address(self, address):
         return cache.get(address)
 
@@ -177,5 +191,5 @@ class AddressValidationResource:
         cache[address] = data
 
 app = falcon.App(middleware=[CorsMiddleware()])
-app.add_route('/validate', AddressValidationResource())
+app.add_route('/validate', AddressValidationResource(concurrency_limit=5))
 app.add_route('/toggle-feature', ToggleFeatureResource())
