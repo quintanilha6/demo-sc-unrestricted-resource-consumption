@@ -6,7 +6,6 @@ class FeatureFlags:
         self.flags = {
             "resourceQuotas": False,
             "timeouts": False,
-            "concurrency": False,
             "inputValidation": False,
             "efficiency": False
         }

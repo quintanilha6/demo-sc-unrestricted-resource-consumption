@@ -13,9 +13,8 @@ Some of the stategies to protect against Unrestricted Resource Consumption are:
 
 1. **Resource Quotas**
 2. **Timeouts**
-3. **Concurrency Limits**
-4. **Input Validation**
-5. **Efficiency Enhancements**
+3. **Input Validation**
+4. **Efficiency Enhancements**
 
 ## Strategies Explained
 
@@ -42,21 +41,7 @@ Some of the stategies to protect against Unrestricted Resource Consumption are:
 
     ```
 
-### 3. Concurrency Limits
-- **Definition:** Concurrency limits restrict the number of simultaneous operations that can occur. This helps in preventing system overload by too many concurrent processes.
-- **Example:** Limit Simultaneous Requests: Use a semaphore or a similar mechanism to limit the number of concurrent address validations that can be processed. This prevents excessive load on the server or the external API.
-    ```python
-    from asyncio import Semaphore
-
-    semaphore = Semaphore(10)  # Allows up to 10 concurrent requests
-
-    async def validate_address(req, resp):
-        async with semaphore:
-            # Perform address validation
-            pass
-    ```
-
-### 4. Input Validation
+### 3. Input Validation
 - **Definition:** Input validation ensures that the incoming data is correctly formatted, valid, and secure before processing. This reduces the risk of injection attacks and errors that can consume undue resources.
 - **Example:** Validate Address Input: Before sending an address to an external API, validate its format and check for any malicious content to ensure it adheres to expected patterns.
     ```python
@@ -65,7 +50,7 @@ Some of the stategies to protect against Unrestricted Resource Consumption are:
         return pattern.match(address) is not None
     ```
 
-### 5. Efficiency Enhancements
+### 4. Efficiency Enhancements
 - **Definition:**  Improvements in code and system architecture that allow processes to use fewer resources, thereby increasing throughput and reducing latency.
 - **Example:** Caching Validations: Implement caching to store the results of previously submited addresses. This reduces the need to perform redundant external API calls for addresses that have been checked before, saving time and resources.
     ```python

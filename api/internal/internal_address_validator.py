@@ -78,7 +78,7 @@ class AddressValidationResource:
                 if not address_data.get('address'):
                     raise InputValidationException("Address input is required")
                 if not self.validate_address_input(address_data['address']):
-                    raise InputValidationException("Address input is not valid.")
+                    raise InputValidationException("Only , . - symbols are accepted")
 
             address = address_data['address']
             logging.info(f"Received address: {address}")
