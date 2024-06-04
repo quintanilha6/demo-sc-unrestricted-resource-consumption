@@ -3,8 +3,10 @@
 ### Table of Contents
 **[Introduction](#introduction)**<br>
 **[Strategies Explained](#strategies-explained)**<br>
-**[How to run the app](#how-to-run-the-app)**<br>
 **[Demo Architecture Diagram](#demo-architecture-diagram)**<br>
+**[Framework built-in tools](#framework-built-in-tools)**<br>
+**[How to run the app](#how-to-run-the-app)**<br>
+
 
 ## Introduction
 This repository focuses on demonstrating some risks associated with unrestricted resource consumption within a web-based address validation service. The topic was chosen as part of a voluntary initiative to deepen understanding of system vulnerabilities and to demonstrate practical defense mechanisms against potential exploitation. The project serves as a hands-on educational tool to explore various security features and optimizations that enhance application robustness and resilience.
@@ -95,7 +97,42 @@ Some of the stategies to protect against Unrestricted Resource Consumption are:
        +----------------+
 ```
 
+## Framework built-in tools
+Most frameworks, like Spring provide built-in tools and features to implement various resource management techniques efficiently. Here are some techniques and how Spring facilitates their implementation:
+
+### Request Quotas with Spring AOP and Spring Security
+By using Spring AOP, you can intercept method calls and enforce quotas based on various criteria such as user authentication, request type, or client identity.
+
+```java
+@Aspect
+@Component
+public class RequestQuotaAspect {
+
+    private static final int MAX_REQUESTS_PER_USER = 100;
+
+    @Pointcut("execution(* com.example.controller.*.*(..))")
+    private void controllerMethods() {}
+
+    @Before("controllerMethods()")
+    public void enforceRequestQuota() {
+        // Implement logic to check the number of requests per user
+        // You can use Spring Security's authentication context to get the current user
+        // Increment a counter for each request and block further requests if the quota is exceeded
+    }
+}
+```
+
+### Timeout Management with Spring WebClient
+Spring WebClient offers the `@Timeout` annotation, allowing us to specify timeouts for HTTP requests. This feature helps prevent resource exhaustion.
+
+### Input Validation with Annotations
+Spring Framework supports declarative input validation using annotations such as `@NotNull`, `@Size`, and `@Pattern`. By annotating DTO (Data Transfer Object) classes with these annotations, you can validate input data easily and ensure data integrity.
+
+### Efficiency Improvements with Spring Features
+Spring Framework offers various features to enhance application efficiency, including caching, asynchronous processing, and performance monitoring. You can leverage Spring's Cache abstraction along with caching providers like Ehcache or Redis.
+
 ## How to run the app
 - Run the 3 apps (internal api, external api and UI) with docker-compose `docker-compose up -d --build`
 - Go to `localhost:8080` for the ui
 - Check the logs for each of the apis with `docker-compose logs -f external_api` and `docker-compose logs -f internal_api`
+- Play around with the app and enjoy seeing the behaviour between the internal and external backend with the different security flags turned on/off
