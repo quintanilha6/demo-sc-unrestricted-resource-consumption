@@ -1,4 +1,4 @@
-# Demonstration Project for Managing Unrestricted Resource Consumption
+# Demonstration Project for OWASP API Security Top 10 -> API4:2023 Unrestricted Resource Consumption
 
 ### Table of Contents
 **[Introduction](#introduction)**<br>
@@ -101,7 +101,7 @@ Some of the stategies to protect against Unrestricted Resource Consumption are:
 Most frameworks, like Spring provide built-in tools and features to implement various resource management techniques efficiently. Here are some techniques and how Spring facilitates their implementation:
 
 ### Request Quotas with Spring AOP and Spring Security
-By using Spring AOP, you can intercept method calls and enforce quotas based on various criteria such as user authentication, request type, or client identity.
+By using Spring AOP, we can intercept method calls and enforce quotas based on various criteria such as user authentication, request type, or client identity.
 
 ```java
 @Aspect
@@ -116,7 +116,7 @@ public class RequestQuotaAspect {
     @Before("controllerMethods()")
     public void enforceRequestQuota() {
         // Implement logic to check the number of requests per user
-        // You can use Spring Security's authentication context to get the current user
+        // We can use Spring Security's authentication context to get the current user
         // Increment a counter for each request and block further requests if the quota is exceeded
     }
 }
@@ -126,10 +126,14 @@ public class RequestQuotaAspect {
 Spring WebClient offers the `@Timeout` annotation, allowing us to specify timeouts for HTTP requests. This feature helps prevent resource exhaustion.
 
 ### Input Validation with Annotations
-Spring Framework supports declarative input validation using annotations such as `@NotNull`, `@Size`, and `@Pattern`. By annotating DTO (Data Transfer Object) classes with these annotations, you can validate input data easily and ensure data integrity.
+Spring Framework supports declarative input validation using annotations such as `@NotNull`, `@Size`, and `@Pattern`. By annotating DTO (Data Transfer Object) classes with these annotations, we can validate input data easily and ensure data integrity.
 
 ### Efficiency Improvements with Spring Features
-Spring Framework offers various features to enhance application efficiency, including caching, asynchronous processing, and performance monitoring. You can leverage Spring's Cache abstraction along with caching providers like Ehcache or Redis.
+Spring Framework offers various features to enhance application efficiency, including caching (`@Cacheable`), asynchronous processing, and performance monitoring. We can leverage Spring's Cache abstraction along with caching providers like Ehcache or Redis.
+
+### Spring Cloud
+Spring cloud offers [Circuit Breaker](https://spring.io/projects/spring-cloud-circuitbreaker), [Gateway](https://spring.io/projects/spring-cloud-gateway) and others that can also be useful to prevent exploitation.
+
 
 ## How to run the app
 - Run the 3 apps (internal api, external api and UI) with docker-compose `docker-compose up -d --build`

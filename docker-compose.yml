@@ -5,6 +5,7 @@ services:
       dockerfile: api/internal/Dockerfile
     ports:
       - "8000:8000"
+    container_name: internal_api
 
   external_api:
     build:
@@ -12,6 +13,7 @@ services:
       dockerfile: api/external/Dockerfile
     ports:
       - "8001:8001"
+    container_name: external_api
 
   ui:
     build:
@@ -19,3 +21,4 @@ services:
       dockerfile: ui/Dockerfile
     ports:
       - "8080:8080"
+    container_name: ui

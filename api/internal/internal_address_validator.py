@@ -65,7 +65,7 @@ class AddressValidationResource:
         if not feature_flags.check_and_increment_quota():
             resp.media = {
                 'status': 'error',
-                'message': 'Quota exceeded. Please wait 30 seconds before retrying.'
+                'message': 'Quota exceeded. Please wait 5 seconds before retrying.'
             }
             resp.status = falcon.HTTP_429
             return
@@ -88,6 +88,7 @@ class AddressValidationResource:
                 cached_result = self.get_cached_address(address)
                 if cached_result:
                     logging.info(f"Cache hit for address: {address}")
+                    logging.info(cached_result.get('message')+"\n")
                     resp.media = {
                         'status': 'success',
                         'validation': cached_result.get('validation'),
@@ -101,7 +102,7 @@ class AddressValidationResource:
             validated_data = self.validate_address_external(address, wait=wait_time)
 
             if validated_data:
-                logging.info(f"External service response: {validated_data.get('message')}")
+                logging.info(f"External service response: {validated_data.get('message')}\n")
                 if feature_flags.is_enabled('efficiency'):
                     # Cache the successful validation
                     self.cache_validated_address(address, validated_data)
@@ -117,7 +118,7 @@ class AddressValidationResource:
                 }
                 resp.status = falcon.HTTP_200
             else:
-                logging.error("Failed to validate address with external service")
+                logging.error("Failed to validate address with external service\n")
                 resp.media = {
                     'status': 'failure',
                     'message': 'Failed to validate address with external service'
@@ -156,6 +157,7 @@ class AddressValidationResource:
             url = 'http://external_api:8001/validate'
         
         try:
+            logging.info(f"Sendind POST request to validate address: {address}")
             response = requests.post(url, json={'address': address}, timeout=3)
             if response.status_code == 200:
                 return response.json()
